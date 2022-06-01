@@ -53,10 +53,6 @@
             cursor: pointer;
         }
 
-        .desk__item {
-
-        }
-
         .desk__item-input {
             width: 100%;
             padding: 10px 15px;
@@ -303,9 +299,9 @@
         }
 
         static createRoot() {
-            const range = document.createRange();
+            const range = document.createRange()
 
-            range.selectNode(document.body);
+            range.selectNode(document.body)
 
             return range.createContextualFragment(`
 			<div class="desk__item" draggable="true">
@@ -317,13 +313,13 @@
                     <div class="desk__item_description-input" contenteditable></div>
                 </div>
 			</div>
-		`).children[0];
+		`).children[0]
         }
     }
 
     class DeskAPI {
         static getStates() {
-            const state = read();
+            const state = read()
 
             if (state.length === 0) {
                 const stateExample = {
@@ -363,30 +359,30 @@
                 tickets: []
             }
 
-            data.push(state);
-            save(data);
+            data.push(state)
+            save(data)
 
 
-            return state;
+            return state
         }
 
         static insertTicket(stateId, content, description) {
-            const data = read();
-            const state = data.find(state => state.id === stateId);
+            const data = read()
+            const state = data.find(state => state.id === stateId)
             const ticket = {
                 id: Math.floor(Math.random() * 100000),
                 content,
                 description
-            };
-
-            if (!state) {
-                throw new Error("State does not exist.");
             }
 
-            state.tickets.push(ticket);
-            save(data);
+            if (!state) {
+                throw new Error("State does not exist.")
+            }
 
-            return ticket;
+            state.tickets.push(ticket)
+            save(data)
+
+            return ticket
         }
 
         static updateStateName(stateId, newProps) {
@@ -416,7 +412,7 @@
                 throw new Error("Ticket not found.")
             }
 
-            ticket.content = newProps.content === undefined ? ticket.content : newProps.content;
+            ticket.content = newProps.content === undefined ? ticket.content : newProps.content
 
             if (newProps.stateId !== undefined && newProps.position !== undefined) {
                 const targetState = data.find(state => state.id === newProps.stateId)
@@ -457,41 +453,41 @@
                 currentState.tickets.splice(currentState.tickets.indexOf(ticket), 1)
                 targetState.tickets.splice(newProps.position, 0, ticket)
             }
-            save(data);
+            save(data)
         }
 
 
         static deleteState(stateId) {
-            const data = read();
-            const stateToDelete = data.find(state => state.id === stateId);
+            const data = read()
+            const stateToDelete = data.find(state => state.id === stateId)
 
-            data.splice(data.indexOf(stateToDelete), 1);
+            data.splice(data.indexOf(stateToDelete), 1)
 
-            save(data);
+            save(data)
         }
 
         static deleteTicket(ticketId) {
-            const data = read();
+            const data = read()
 
             for (const state of data) {
-                const ticket = state.tickets.find(ticket => ticket.id === ticketId);
+                const ticket = state.tickets.find(ticket => ticket.id === ticketId)
 
                 if (ticket) {
-                    state.tickets.splice(state.tickets.indexOf(ticket), 1);
+                    state.tickets.splice(state.tickets.indexOf(ticket), 1)
                 }
             }
 
-            save(data);
+            save(data)
         }
     }
 
     class DropZone {
         static createDropZone() {
-            const range = document.createRange();
+            const range = document.createRange()
 
-            range.selectNode(document.body);
+            range.selectNode(document.body)
 
-            const dropZone = range.createContextualFragment(`<div class="desk__dropzone"></div>`).children[0];
+            const dropZone = range.createContextualFragment(`<div class="desk__dropzone"></div>`).children[0]
 
             dropZone.addEventListener("dragover", e => {
                 e.preventDefault()
@@ -530,7 +526,7 @@
     }
 
     function read() {
-        const json = localStorage.getItem("desk-data");
+        const json = localStorage.getItem("desk-data")
 
         if (!json) {
             return [
@@ -541,11 +537,11 @@
             ]
         }
 
-        return JSON.parse(json);
+        return JSON.parse(json)
     }
 
     function save(data) {
-        localStorage.setItem("desk-data", JSON.stringify(data));
+        localStorage.setItem("desk-data", JSON.stringify(data))
     }
 
     new App(
