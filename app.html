@@ -5,22 +5,26 @@
     <title>Kanban desk</title>
     <style>
         body {
-            margin: 10vh 0;
+            margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100vw;
         }
 
         .desk {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(6, 1fr);
+            width: 100%;
+            background: gray;
+            min-height: 100vh;
+        }
 
-            padding: 30px;
-            width: 80vw;
-            max-width: 1200px;
-            background: #c5cfec;
-            border-radius: 5px;
+        .desk__item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .desk * {
@@ -29,16 +33,13 @@
 
         .desk__state {
             flex: 1;
-            width: 80%;
-            background: #ebecf0;
-            padding: 10px;
-            margin: 10px 0;
-            color: #172b4d;
-            border-radius: 10px;
+            width: 100%;
+            border: 1px solid black;
         }
 
         .desk__state-state {
             display: flex;
+            border-bottom: 1px solid black;
         }
 
         .desk__state:not(:last-child) {
@@ -47,27 +48,32 @@
 
         .desk__state-input {
             width: 100%;
-            margin-bottom: 20px;
+            padding: 20px 10px;
+            color: white;
             box-sizing: border-box;
-            font-size: 30px;
+            font-size: 25px;
             cursor: pointer;
+            text-align: center;
+            word-break: break-all;
         }
 
         .desk__item-input {
             width: 100%;
             padding: 10px 15px;
             box-sizing: border-box;
-            background: white;
+            background: #ecdb71;
             border-radius: 5px;
             cursor: pointer;
+            word-break: break-all;
         }
 
         .desk__item-delete {
-            background: white;
+            background: transparent;
             height: 30px;
             margin: 0 5px;
-            border: 2px solid #ec8080;
-            border-radius: 5px;
+            border: none;
+            color: red;
+            font-size: 30px;
             cursor: pointer;
         }
 
@@ -82,6 +88,7 @@
 
         .desk__dropzone {
             height: 20px;
+            width: 100%;
             transition: background 0.15s, height 0.15s;
         }
 
@@ -91,8 +98,11 @@
         }
 
         .ticket {
+            width: 80%;
+            max-width: 80%;
+            align-content: center;
             padding: 5px 0;
-            background-color: white;
+            background-color: #ecdb71;
             border-radius: 5px;
         }
 
@@ -109,10 +119,16 @@
             border-radius: 5px;
             cursor: pointer;
             color: lightgray;
+            word-break: break-all;
+        }
+
+        .desk__item_button {
+            display: flex;
+            justify-content: center;
         }
 
         .desk__add-item {
-            width: 100%;
+            width: 80%;
             padding: 10px 0;
             font-size: 16px;
             color: white;
@@ -129,36 +145,16 @@
     class App {
         constructor(root) {
             this.root = root
-            this.root.addStateBtn = this.root.appendChild(App.createAddStateBlock())
 
             App.states().forEach(state => {
                 const stateView = new State(state.id, state.name)
 
                 this.root.appendChild(stateView.elements.root)
             })
-
-            this.root.addStateBtn.addEventListener("click", () => {
-                const newTicket = DeskAPI.insertState()
-                const newState = new State(newTicket.id, newTicket.name)
-
-                this.root.appendChild(newState.elements.root)
-            })
         }
 
         static states() {
             return DeskAPI.getStates()
-        }
-
-        static createAddStateBlock() {
-            const range = document.createRange()
-
-            range.selectNode(document.body)
-
-            return range.createContextualFragment(`
-                <div class="desk__state">
-                    <button class="desk__add-state" type="button">+ Add state</button>
-                </div>
-            `).children[0]
         }
     }
 
@@ -169,7 +165,6 @@
             this.elements = {}
             this.elements.root = State.createRoot()
             this.elements.name = this.elements.root.querySelector(".desk__state-input")
-            this.elements.deleteStateBtn = this.elements.root.querySelector(".desk__state-delete")
             this.elements.tickets = this.elements.root.querySelector(".desk__state-items")
             this.elements.addTicket = this.elements.root.querySelector(".desk__add-item")
 
@@ -196,14 +191,6 @@
             }
             this.elements.name.addEventListener("blur", onNameBlur)
 
-            this.elements.deleteStateBtn.addEventListener("click", () => {
-
-                DeskAPI.deleteState(id)
-
-                this.elements.name.removeEventListener("blur", onNameBlur)
-                this.elements.root.parentElement.removeChild(this.elements.root)
-            })
-
             this.elements.addTicket.addEventListener("click", () => {
                 const newTicket = DeskAPI.insertTicket(id, "")
 
@@ -218,12 +205,13 @@
 
             return range.createContextualFragment(`
                 <div class="desk__state">
-                <div class="desk__state-state">
-                    <div class="desk__state-input" contenteditable></div>
-                    <button class="desk__state-delete">Delete</button>
-                </div>
+                    <div class="desk__state-state">
+                        <div class="desk__state-input" contenteditable></div>
+                    </div>
                     <div class="desk__state-items"></div>
-                    <button class="desk__add-item" type="button">+ Add ticket</button>
+                    <div class="desk__item_button">
+                        <button class="desk__add-item" type="button">+ Add ticket</button>
+                    </div>
                 </div>
             `).children[0]
         }
@@ -308,7 +296,7 @@
 			    <div class="ticket">
 			        <div class="ticket-title">
 			            <div class="desk__item-input" contenteditable></div>
-				        <button class="desk__item-delete">Delete</button>
+				        <button class="desk__item-delete">&#215</button>
                     </div>
                     <div class="desk__item_description-input" contenteditable></div>
                 </div>
@@ -349,21 +337,6 @@
             }
 
             return state.tickets
-        }
-
-        static insertState() {
-            const data = read()
-            const state = {
-                id: Math.floor(Math.random() * 100000),
-                name: "New state!",
-                tickets: []
-            }
-
-            data.push(state)
-            save(data)
-
-
-            return state
         }
 
         static insertTicket(stateId, content, description) {
@@ -456,15 +429,16 @@
             save(data)
         }
 
+        // in case State should be deletable
 
-        static deleteState(stateId) {
-            const data = read()
-            const stateToDelete = data.find(state => state.id === stateId)
-
-            data.splice(data.indexOf(stateToDelete), 1)
-
-            save(data)
-        }
+        // static deleteState(stateId) {
+        //     const data = read()
+        //     const stateToDelete = data.find(state => state.id === stateId)
+        //
+        //     data.splice(data.indexOf(stateToDelete), 1)
+        //
+        //     save(data)
+        // }
 
         static deleteTicket(ticketId) {
             const data = read()
@@ -527,14 +501,79 @@
 
     function read() {
         const json = localStorage.getItem("desk-data")
+        let initialExample
 
         if (!json) {
-            return [
+            initialExample = [{
+                id: Math.floor(Math.random() * 100000),
+                name: "Backlog",
+                tickets: [
+                    {
+                        id: Math.floor(Math.random() * 100000),
+                        content: "Ticket title (click to edit)",
+                        description: "Ticket description (click to edit)"
+                    }
+                ]
+            },
                 {
-                    name: "initial state",
-                    tickets: []
+                    id: Math.floor(Math.random() * 100000),
+                    name: "In progress",
+                    tickets: [
+                        {
+                            id: Math.floor(Math.random() * 100000),
+                            content: "Ticket title (click to edit)",
+                            description: "Ticket description (click to edit)"
+                        }
+                    ]
+                },
+                {
+                    id: Math.floor(Math.random() * 100000),
+                    name: "Peer review",
+                    tickets: [
+                        {
+                            id: Math.floor(Math.random() * 100000),
+                            content: "Ticket title (click to edit)",
+                            description: "Ticket description (click to edit)"
+                        }
+                    ]
+                },
+                {
+                    id: Math.floor(Math.random() * 100000),
+                    name: "In test",
+                    tickets: [
+                        {
+                            id: Math.floor(Math.random() * 100000),
+                            content: "Ticket title (click to edit)",
+                            description: "Ticket description (click to edit)"
+                        }
+                    ]
+                },
+                {
+                    id: Math.floor(Math.random() * 100000),
+                    name: "Done",
+                    tickets: [
+                        {
+                            id: Math.floor(Math.random() * 100000),
+                            content: "Ticket title (click to edit)",
+                            description: "Ticket description (click to edit)"
+                        }
+                    ]
+                },
+                {
+                    id: Math.floor(Math.random() * 100000),
+                    name: "Blocked",
+                    tickets: [
+                        {
+                            id: Math.floor(Math.random() * 100000),
+                            content: "Ticket title (click to edit)",
+                            description: "Ticket description (click to edit)"
+                        }
+                    ]
                 }
             ]
+
+            save(initialExample)
+            return initialExample
         }
 
         return JSON.parse(json)
